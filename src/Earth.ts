@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { EarthquakeRecord } from './EarthquakeRecord';
 import { EarthquakeMarker } from './EarthquakeMarker';
+import { UVMapping } from 'three';
 
 export class Earth extends THREE.Group
 {
@@ -22,36 +23,89 @@ export class Earth extends THREE.Group
     {
         // Initialize texture: you can change to a lower-res texture here if needed
         // Note that this won't display properly until you assign texture coordinates to the mesh
-        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-2k.png');
+        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-1k.png');
         this.earthMaterial.map.minFilter = THREE.LinearFilter;
+
+        this.earthMesh.material = this.earthMaterial;
 
         // Setup the debug material for wireframe viewing
         this.debugMaterial.wireframe = true;
 
-        // As a demo, we'll add a square with 2 triangles.
-        // First, we define four vertices
-        var vertices = [];
-        vertices.push(-.5, -.5, 0);
-        vertices.push(.5, -.5, 0);
-        vertices.push(.5, .5, 0);
-        vertices.push(-.5, .5, 0);
+        var x = -Math.PI;
+        var y = Math.PI/2;
 
+        var x_inc = (2*Math.PI)/80;
+        var y_inc = Math.PI/80;
+
+        // Setting vertices
+        var vertices = [];
+        for(let j = 0; j <= 80; j++) {
+            for(let i = 0; i <= 80; i++) {
+                vertices.push(x + x_inc*i, y - y_inc*j, 0);
+            }
+        }
+            
         // The normals are always directly outward towards the camera
         var normals = [];
-        normals.push(0, 0, 1);
-        normals.push(0, 0, 1);
-        normals.push(0, 0, 1);
-        normals.push(0, 0, 1);
+        for(let i = 0; i < 6561; i++) {
+            normals.push(0, 0, 1);
+        }
 
         // Next we define indices into the array for the two triangles
+        var upper_tri_1 =1;
+        var upper_tri_2 =0;
+        var upper_tri_3 = 82;
+        var lower_tri_1 = 82;
+        var lower_tri_2 = 0;
+        var lower_tri_3 = 81;
         var indices = [];
-        indices.push(0, 1, 2);
-        indices.push(0, 2, 3);
+        for(let j = 0;j < 40; j++) {
+            var extra = j*81;
+            for(let i = 0; i < 25; i++) {
+                
+                //y = v
+                //u = x
+
+
+                indices.push(upper_tri_1+i+extra,upper_tri_2+i+extra,upper_tri_3+i+extra);
+                indices.push(lower_tri_1+i+extra,lower_tri_2+i+extra,lower_tri_3+i+extra);
+
+            }
+        }
+        for(let j = 0;j < 80; j++) {
+            var extra = j*81;
+            for(let i = 0; i < 80; i++) {
+                
+                //y = v
+                //u = x
+
+
+                
+            }
+        }
 
         // Set the vertex positions in the geometry
+        var uv = [];
+        var u = 6400
+        var v = 6400
+
+        for(let i = 0; i < 80; i++) {
+            for(let j = 0; j < 80; j++) {
+                 uv.push(.0125*j,1-(.0125*i));
+                // uv.push( j / 80,(1-i/80) - 1/80);
+                // uv.push( (j+1) / 80,(1-i/80)-1/80);
+                // uv.push( (j+1) / 80, (1-(i-1)/80)-1/80);
+                // uv.push( j / 80, (1-(i-1)/3)-1/80)
+            }
+
+        }
+            
+
+        
         // The itemSize is 3 because each item is X, Y, Z
         this.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
         this.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+        this.earthMesh.geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
 
         // Set the triangle indices
         this.earthMesh.geometry.setIndex(indices);
