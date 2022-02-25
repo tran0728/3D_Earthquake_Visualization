@@ -19,12 +19,12 @@ export class EarthquakeMarker extends THREE.Mesh
         // Create the sphere geometry
         // Global adjustment of 0.05 to reduce the size
         // You should probably update this be a more meaningful representation of the data
-        this.geometry = new THREE.SphereGeometry(0.05);
+        this.geometry = new THREE.SphereGeometry(0.1*this.magnitude);
 
         // Initially, the color is set to yellow
         // You should update this to be more a meaningful representation of the data
         var material = new THREE.MeshLambertMaterial();
-        material.color = new THREE.Color(1, 1, 0);
+        material.color = new THREE.Color(1*this.magnitude, 1-this.magnitude, 0);
         this.material = material;
     }
 

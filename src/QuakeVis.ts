@@ -72,6 +72,16 @@ export class QuakeVis extends GraphicsApp
         viewController.name('View Mode');
         viewController.onChange((value: string) => { 
             // TO DO: switch between map and globe views
+            if(value == 'Map') {
+                this.earth.globeMode = false;
+                this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.vertices, 3));
+                this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.normals, 3));
+            }
+            if(value == 'Globe') {
+                this.earth.globeMode = true;
+                this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.sphere_vertices, 3));
+                this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.sphere_normals, 3));
+            }
         });
         
         // Create a GUI control for the playback speed and add a change event handler
@@ -124,7 +134,7 @@ export class QuakeVis extends GraphicsApp
             // Uncomment this line of code to start creating earthquake markers
             // They will initially be placed at random locations on a plane
             // You will need to update the code to compute correct positions on the map and globe
-            //this.earth.createEarthquake(quake);
+            this.earth.createEarthquake(quake);
 
             quake = this.earthquakeDB.getNextQuake(currentDate);
         }
