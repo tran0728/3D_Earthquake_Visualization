@@ -74,13 +74,15 @@ export class QuakeVis extends GraphicsApp
             // TO DO: switch between map and globe views
             if(value == 'Map') {
                 this.earth.globeMode = false;
-                this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.vertices, 3));
-                this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.normals, 3));
+                this.earth.morph_me = true;
+                // this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.vertices, 3));
+                // this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.normals, 3));
             }
             if(value == 'Globe') {
+                this.earth.morph_me = true;
                 this.earth.globeMode = true;
-                this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.sphere_vertices, 3));
-                this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.sphere_normals, 3));
+                // this.earth.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.earth.sphere_vertices, 3));
+                // this.earth.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(this.earth.sphere_normals, 3));
             }
         });
         

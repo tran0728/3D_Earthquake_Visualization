@@ -14,6 +14,8 @@ export class Earth extends THREE.Group
     public normals: any[];
     public sphere_normals: any[];
     public globeMode: Boolean;
+    public alpha: number;
+    public morph_me: Boolean;
 
 
 
@@ -30,13 +32,15 @@ export class Earth extends THREE.Group
         this.normals = [];
         this.sphere_normals = [];
         this.globeMode = false;
+        this.alpha = 0;
+        this.morph_me = false;
     }
 
     public initialize() : void
     {
         // Initialize texture: you can change to a lower-res texture here if needed
         // Note that this won't display properly until you assign texture coordinates to the mesh
-        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-2k.png');
+        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-1k.png');
         this.earthMaterial.map.minFilter = THREE.LinearFilter;
 
         this.earthMesh.material = this.earthMaterial;
@@ -51,18 +55,37 @@ export class Earth extends THREE.Group
         var y_inc = Math.PI/80;
 
         // Setting vertices
+        var scale = Math.PI/180
 
         for(let j = 0; j <= 80; j++) {
             for(let i = 0; i <= 80; i++) {
                 this.vertices.push(x + x_inc*i, y - y_inc*j, 0);
             }
         }
+        for(let i = 0; i < 6561/3; i++) {
+
+
+
+        }
 
         for(let j = 0; j <= 80; j++) {
             for(let i = 0; i <= 80; i++) {
-                var x_sphere = Math.sin(Math.PI * j/80)*Math.cos(2*Math.PI * i/80);
-                var y_sphere = Math.sin(Math.PI * j/80)*Math.sin(2*Math.PI * i/80);
-                var z_sphere = Math.cos(Math.PI * j/80);
+                // var x_sphere = Math.sin(Math.PI * j/80)*Math.cos(2*Math.PI * i/80);
+                // var y_sphere = Math.sin(Math.PI * j/80)*Math.sin(2*Math.PI * i/80);
+                // var z_sphere = Math.cos(Math.PI * j/80);
+                var ratio_y = (y-y_inc*j) / (Math.PI/2);
+                var ratio_x = (x+x_inc*i) / Math.PI;
+                var latitude = ratio_y * 90 * Math.PI/180;
+                var longitude = ratio_x * 180 * Math.PI/180;
+                //convert from [-PI,PI] to (-180,180) for x
+                //convert from [PI/2,PI/2] to (-90,90) for y
+                var x_sphere = Math.cos(latitude) * Math.sin(longitude);
+                var y_sphere = Math.sin(latitude);
+                var z_sphere = Math.cos(latitude) * Math.cos(longitude);
+
+                // var x_sphere = Math.cos(y-y_inc*j) * Math.sin(x+x_inc*i);
+                // var y_sphere = Math.sin(y-y_inc*j)
+                // var z_sphere = Math.cos(y-y_inc*j) * Math.cos(x+x_inc*i);
                 this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
             }
         }
@@ -124,13 +147,37 @@ export class Earth extends THREE.Group
     // TO DO: add animations for mesh morphing
     public update(deltaTime: number) : void
     {
-        
+        if(this.morph_me){
+            this.morph(deltaTime);
+        }
+
     }
 
-    public morph() : void {
-        //lerp between map and globe
-        //lerp between map normal and globe normal
-        //alpha
+    public morph(deltaTime: number) : void {
+        this.alpha += deltaTime;
+        if(this.alpha > 1) {
+            this.morph_me = false;
+            this.alpha = 0;
+            return;
+        }
+        var normals_array = [];
+        var vectors_array = [];
+        if(this.globeMode == true){
+            for(let i = 0; i < 6561; i++) {
+                vectors_array.push(THREE.MathUtils.lerp(this.vertices[i], this.sphere_vertices[i], this.alpha));
+                normals_array.push(THREE.MathUtils.lerp(this.normals[i], this.sphere_normals[i], this.alpha));
+            }
+        }
+        if(this.globeMode == false) {
+            for(let i = 0; i < 6561; i++) {
+                vectors_array.push(THREE.MathUtils.lerp(this.sphere_vertices[i], this.vertices[i], this.alpha));
+                normals_array.push(THREE.MathUtils.lerp(this.sphere_normals[i], this.normals[i], this.alpha));
+            }
+        }
+        this.earthMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(vectors_array, 3));
+        this.earthMesh.geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals_array, 3));
+        
+
 
     }
 
