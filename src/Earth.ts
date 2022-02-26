@@ -62,33 +62,27 @@ export class Earth extends THREE.Group
                 this.vertices.push(x + x_inc*i, y - y_inc*j, 0);
             }
         }
-        for(let i = 0; i < 6561/3; i++) {
 
+        for (let i = 0; i < 6561*3; i=i+3) {
+            var ver_x = this.vertices[i]
+            var ver_y = this.vertices[i+1]
 
+            var longitude = this.rescale(ver_x, -Math.PI, Math.PI, -180, 180) * Math.PI/180;
+            var latitude = this.rescale(ver_y, (-Math.PI/2), (Math.PI/2), -90, 90) * Math.PI/180;
 
+            var x_sphere = Math.cos(latitude) * Math.sin(longitude);
+            var y_sphere = Math.sin(latitude);
+            var z_sphere = Math.cos(latitude) * Math.cos(longitude);
+            this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
         }
-
-        for(let j = 0; j <= 80; j++) {
-            for(let i = 0; i <= 80; i++) {
-                // var x_sphere = Math.sin(Math.PI * j/80)*Math.cos(2*Math.PI * i/80);
-                // var y_sphere = Math.sin(Math.PI * j/80)*Math.sin(2*Math.PI * i/80);
-                // var z_sphere = Math.cos(Math.PI * j/80);
-                var ratio_y = (y-y_inc*j) / (Math.PI/2);
-                var ratio_x = (x+x_inc*i) / Math.PI;
-                var latitude = ratio_y * 90 * Math.PI/180;
-                var longitude = ratio_x * 180 * Math.PI/180;
-                //convert from [-PI,PI] to (-180,180) for x
-                //convert from [PI/2,PI/2] to (-90,90) for y
-                var x_sphere = Math.cos(latitude) * Math.sin(longitude);
-                var y_sphere = Math.sin(latitude);
-                var z_sphere = Math.cos(latitude) * Math.cos(longitude);
-
-                // var x_sphere = Math.cos(y-y_inc*j) * Math.sin(x+x_inc*i);
-                // var y_sphere = Math.sin(y-y_inc*j)
-                // var z_sphere = Math.cos(y-y_inc*j) * Math.cos(x+x_inc*i);
-                this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
-            }
-        }
+        // for(let j = 0; j <= 80; j++) {
+        //     for(let i = 0; i <= 80; i++) {
+        //         // var x_sphere = Math.sin(Math.PI * j/80)*Math.cos(2*Math.PI * i/80);
+        //         // var y_sphere = Math.sin(Math.PI * j/80)*Math.sin(2*Math.PI * i/80);
+        //         // var z_sphere = Math.cos(Math.PI * j/80);
+        //         this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
+        //     }
+        // }
             
         // The normals are always directly outward towards the camera
 
@@ -142,6 +136,10 @@ export class Earth extends THREE.Group
 
         // Add the mesh to this group
         this.add(this.earthMesh);
+    }
+
+    public rescale(x: number, xmin: number, xmax: number, ymin: number, ymax: number) : number {
+        return ymin + (ymax - ymin) * (x - xmin) / (xmax - xmin);
     }
 
     // TO DO: add animations for mesh morphing
