@@ -67,13 +67,13 @@ export class Earth extends THREE.Group
             var ver_x = this.vertices[i]
             var ver_y = this.vertices[i+1]
 
-            var longitude = this.rescale(ver_x, -Math.PI, Math.PI, -180, 180) * Math.PI/180;
-            var latitude = this.rescale(ver_y, (-Math.PI/2), (Math.PI/2), -90, 90) * Math.PI/180;
+            var longitude = this.rescale(ver_x, 0, Math.PI, 0, 180);
+            var latitude = this.rescale(ver_y, 0, (Math.PI/2), 0, 90);
 
-            var x_sphere = Math.cos(latitude) * Math.sin(longitude);
-            var y_sphere = Math.sin(latitude);
-            var z_sphere = Math.cos(latitude) * Math.cos(longitude);
-            this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
+            var temp = new THREE.Vector3();
+
+            temp = this.convertLatLongToSphere(latitude, longitude);
+            this.sphere_vertices.push(temp.x, temp.y, temp.z);
         }
         // for(let j = 0; j <= 80; j++) {
         //     for(let i = 0; i <= 80; i++) {
