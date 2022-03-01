@@ -40,7 +40,7 @@ export class Earth extends THREE.Group
     {
         // Initialize texture: you can change to a lower-res texture here if needed
         // Note that this won't display properly until you assign texture coordinates to the mesh
-        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-1k.png');
+        this.earthMaterial.map = new THREE.TextureLoader().load('./data/earth-2k.png');
         this.earthMaterial.map.minFilter = THREE.LinearFilter;
 
         this.earthMesh.material = this.earthMaterial;
