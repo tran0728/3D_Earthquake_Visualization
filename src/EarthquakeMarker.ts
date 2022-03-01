@@ -6,15 +6,20 @@ export class EarthquakeMarker extends THREE.Mesh
     public startTime : number;
     public duration : number;
     public magnitude : number;
+    public mapPosition : THREE.Vector3;
+    public globePosition : THREE.Vector3;
+    public position : THREE.Vector3;
 
-    constructor(position : THREE.Vector3, record: EarthquakeRecord, duration : number)
+    constructor(globePosition : THREE.Vector3, mapPosition : THREE.Vector3, record: EarthquakeRecord, duration : number)
     {
         super();
 
         this.startTime = record.date.getTime();
         this.magnitude = record.normalizedMagnitude;
         this.duration = duration;
-        this.position.copy(position);
+        this.mapPosition = mapPosition;
+        this.globePosition = globePosition;
+        this.position = mapPosition;
 
         // Create the sphere geometry
         // Global adjustment of 0.05 to reduce the size

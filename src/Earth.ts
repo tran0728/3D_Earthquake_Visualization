@@ -53,28 +53,57 @@ export class Earth extends THREE.Group
 
         var x_inc = (2*Math.PI)/80;
         var y_inc = Math.PI/80;
+        var num_vert = 0;
 
         // Setting vertices
         var scale = Math.PI/180
+        var indices = [];
 
-        for(let j = 0; j <= 80; j++) {
-            for(let i = 0; i <= 80; i++) {
-                this.vertices.push(x + x_inc*i, y - y_inc*j, 0);
+        for(let i = 0; i < 80; i++) {
+            for(let j = 0; j < 80; j++) {
+                this.vertices.push(x + x_inc*j, y - i*y_inc,0) 
+                this.vertices.push(x + x_inc + x_inc * j, y - i*y_inc,0)
+                this.vertices.push(x + x_inc+x_inc * j, y +y_inc - i * y_inc, 0)
+                this.vertices.push(x + x_inc*j, y +y_inc - y_inc*i, 0);
+
+                this.normals.push(0, 0, 1);
+                this.normals.push(0, 0, 1);
+                this.normals.push(0, 0, 1);
+                this.normals.push(0, 0, 1);
+
             }
         }
 
-        for (let i = 0; i < 6561*3; i=i+3) {
-            var ver_x = this.vertices[i]
-            var ver_y = this.vertices[i+1]
+        for(let i = 0; i<80; i++) {
+            for(let j=0; j<80; j++){
+                var longitude_1 = this.rescale(x + x_inc*j, 0, Math.PI, 0, 180);
+                var latitude_1 = this.rescale(y - i*y_inc, 0, Math.PI/2, 0, 90);
+                var longitude_2 = this.rescale(x + x_inc + x_inc * j, 0, Math.PI, 0, 180);
+                var latitude_2 = this.rescale(y - i*y_inc, 0, Math.PI/2, 0, 90);
+                var longitude_3 = this.rescale(x + x_inc+x_inc * j, 0, Math.PI, 0, 180);
+                var latitude_3 = this.rescale(y +y_inc - i * y_inc, 0, Math.PI/2, 0, 90);
+                var longitude_4 = this.rescale(x + x_inc*j, 0, Math.PI, 0, 180);
+                var latitude_4 = this.rescale(y +y_inc - y_inc*i, 0, Math.PI/2, 0, 90);
 
-            var longitude = this.rescale(ver_x, 0, Math.PI, 0, 180);
-            var latitude = this.rescale(ver_y, 0, (Math.PI/2), 0, 90);
+                var sphere_vertex1 = this.convertLatLongToSphere(latitude_1,longitude_1);
+                var sphere_vertex2 = this.convertLatLongToSphere(latitude_2,longitude_2);
+                var sphere_vertex3 = this.convertLatLongToSphere(latitude_3,longitude_3);
+                var sphere_vertex4 = this.convertLatLongToSphere(latitude_4,longitude_4);
 
-            var temp = new THREE.Vector3();
+                this.sphere_vertices.push(sphere_vertex1.x, sphere_vertex1.y, sphere_vertex1.z);
+                this.sphere_vertices.push(sphere_vertex2.x, sphere_vertex2.y, sphere_vertex2.z);
+                this.sphere_vertices.push(sphere_vertex3.x, sphere_vertex3.y, sphere_vertex3.z);
+                this.sphere_vertices.push(sphere_vertex4.x, sphere_vertex4.y, sphere_vertex4.z);
 
-            temp = this.convertLatLongToSphere(latitude, longitude);
-            this.sphere_vertices.push(temp.x, temp.y, temp.z);
+                this.sphere_normals.push(sphere_vertex1.x, sphere_vertex1.y, sphere_vertex1.z);
+                this.sphere_normals.push(sphere_vertex2.x, sphere_vertex2.y, sphere_vertex2.z);
+                this.sphere_normals.push(sphere_vertex3.x, sphere_vertex3.y, sphere_vertex3.z);
+                this.sphere_normals.push(sphere_vertex4.x, sphere_vertex4.y, sphere_vertex4.z);
+
+
+            }
         }
+
         // for(let j = 0; j <= 80; j++) {
         //     for(let i = 0; i <= 80; i++) {
         //         // var x_sphere = Math.sin(Math.PI * j/80)*Math.cos(2*Math.PI * i/80);
@@ -83,43 +112,27 @@ export class Earth extends THREE.Group
         //         this.sphere_vertices.push(x_sphere,y_sphere,z_sphere);
         //     }
         // }
-            
-        // The normals are always directly outward towards the camera
-
-        for(let i = 0; i < 6561; i++) {
-            this.normals.push(0, 0, 1);
-        }
-        var sphere_normals = [];
-        for(let i = 0; i < 6561; i++) {
-            this.sphere_normals.push(this.sphere_vertices[i]);
-        }
-
-        // Next we define indices into the array for the two triangles
-        var upper_tri_1 =1;
-        var upper_tri_2 =0;
-        var upper_tri_3 = 82;
-        var lower_tri_1 = 82;
-        var lower_tri_2 = 0;
-        var lower_tri_3 = 81;
-        var indices = [];
-        var sphere_indices = [];
-        for(let j = 0;j < 80; j++) {
-            var extra = j*81;
-            for(let i = 0; i < 80; i++) {
-                indices.push(upper_tri_1+i+extra,upper_tri_2+i+extra,upper_tri_3+i+extra);
-                indices.push(lower_tri_1+i+extra,lower_tri_2+i+extra,lower_tri_3+i+extra);
-                sphere_indices.push(upper_tri_1+i+extra,upper_tri_2+i+extra,upper_tri_3+i+extra);
-                sphere_indices.push(lower_tri_1+i+extra,lower_tri_2+i+extra,lower_tri_3+i+extra);
+        for(let i = 0; i < 80; i++) {
+            for(let j = 0; j < 80; j++) {
+                indices.push(num_vert * 4 + 1,num_vert*4+3, num_vert*4);
+                indices.push(num_vert *4 + 1, num_vert *4+2, num_vert *4+3);
+                num_vert++;
             }
         }
+        // The normals are always directly outward towards the camera
+
+
+        // Next we define indices into the array for the two triangles
 
         // Set the vertex positions in the geometry
         var uv = [];
-        var uv_spheres = [];
-        for(let i = 0; i <= 80; i++) {
-            for(let j = 0; j <= 80; j++) {
-                 uv.push(.0125*j,1-(.0125*i));
-                 uv_spheres.push(.0125*j,1-(.0125*i));
+        for(let i = 0; i < 80; i++) {
+            for(let j = 0; j < 80; j++) {
+                //  uv.push(.0125*j,1-(.0125*i));
+                 uv.push( j/80, 1- i / 80);
+                 uv.push((j+1)/80, 1-i/80);
+                 uv.push((j+1)/80, 1-(i-1)/80);
+                 uv.push(j/80, 1-(i-1)/80);
             }
 
         }
@@ -161,13 +174,13 @@ export class Earth extends THREE.Group
         var normals_array = [];
         var vectors_array = [];
         if(this.globeMode == true){
-            for(let i = 0; i < 6561; i++) {
+            for(let i = 0; i < 6400*15; i++) {
                 vectors_array.push(THREE.MathUtils.lerp(this.vertices[i], this.sphere_vertices[i], this.alpha));
                 normals_array.push(THREE.MathUtils.lerp(this.normals[i], this.sphere_normals[i], this.alpha));
             }
         }
         if(this.globeMode == false) {
-            for(let i = 0; i < 6561; i++) {
+            for(let i = 0; i < 6400*15; i++) {
                 vectors_array.push(THREE.MathUtils.lerp(this.sphere_vertices[i], this.vertices[i], this.alpha));
                 normals_array.push(THREE.MathUtils.lerp(this.sphere_normals[i], this.normals[i], this.alpha));
             }
@@ -185,6 +198,23 @@ export class Earth extends THREE.Group
         this.children.forEach((quake : THREE.Object3D) => {
             if(quake instanceof EarthquakeMarker)
             {
+                if(this.morph_me) {
+                    if(this.globeMode == true){
+                        quake.position.lerpVectors(quake.mapPosition, quake.globePosition, this.alpha);
+                    }
+                    if(this.globeMode == false){
+                        quake.position.lerpVectors(quake.globePosition, quake.mapPosition, this.alpha);
+                    }
+                }
+                if(!this.morph_me) {
+                    if(this.globeMode == true) {
+                        quake.position = quake.globePosition;
+                    }
+                    if(this.globeMode == false){
+                        quake.position = quake.mapPosition;
+                    }
+                }
+                
                 if(quake.getPlaybackLife(currentTime) == 1)
                     this.remove(quake);
             }
@@ -198,15 +228,15 @@ export class Earth extends THREE.Group
 
         // TO DO: currently, the earthquake is just placed randomly on the plane
         // You will need to update this code to calculate both the map and globe positions
-        if(this.globeMode) {
-            var position = this.convertLatLongToSphere(record.latitude, record.longitude);
-        }
-        else {
-            
-            var position = this.convertLatLongToPlane(record.latitude,record.longitude);
-        }
         
-        var earthquake = new EarthquakeMarker(position, record, duration);
+            var globePosition = this.convertLatLongToSphere(record.latitude, record.longitude);
+        
+        
+            
+            var mapPosition = this.convertLatLongToPlane(record.latitude,record.longitude);
+        
+        
+        var earthquake = new EarthquakeMarker(globePosition, mapPosition, record, duration);
         this.add(earthquake);
     }
 
